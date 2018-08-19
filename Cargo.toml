@@ -1,0 +1,6 @@
+[package]
+name = "brainf__k"
+version = "0.1.0"
+authors = ["ryota-sakamoto <sakamo.ryota+github@gmail.com>"]
+
+[dependencies]
