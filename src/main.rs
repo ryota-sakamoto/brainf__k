@@ -36,6 +36,8 @@ fn main() {
     let mut value: Vec<u8> = vec![0u8; len];
     let mut value_point: usize = 0;
     let mut action_point: usize = 0;
+    let mut loop_start: Option<usize> = None;
+    let mut loop_end: Option<usize> = None;
 
     loop {
         if action_point >= actions.len() {
@@ -44,24 +46,43 @@ fn main() {
         let ref action = actions[action_point];
         let mut m = value[value_point];
 
+        // println!("{}: {:?}, {}: {}", action_point, action, value_point, m);
+
         match action {
             Advance => value_point += 1,
             Reverse => value_point -= 1,
-            Increment => m += 1,
-            Decrement => m -= 1,
+            Increment => value[value_point] += 1,
+            Decrement => value[value_point] -= 1,
             Output => print!("{}", String::from_utf8(vec![m]).unwrap()),
             Input => {},
             Loop => {
-
+                if m != 0 {
+                    loop_start = Some(action_point);
+                } else if let Some(end) = loop_end {
+                    action_point = end + 1;
+                    loop_end = None;
+                    continue;
+                } else {
+                    let mut skip_iter = actions.iter().skip(action_point);
+                    let pos = skip_iter.position(|p| match p {
+                        LoopEnd => true,
+                        _ => false,
+                    });
+                    if let Some(p) = pos {
+                        action_point += p;
+                    } else {
+                        panic!("Invalid Loop")
+                    }
+                }
             },
             LoopEnd => {
-
+                action_point = loop_start.unwrap();
+                continue;
             },
             Invalid => {},
         }
 
         action_point += 1;
-        value[value_point] = m;
 
         io::stdout().flush();
     }
